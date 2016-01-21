@@ -1,25 +1,41 @@
+import evernote.edam.notestore.NoteStore as NoteStore
 import evernote.edam.limits.constants as Limits
+import evernote.edam.type.ttypes as Types
+import thrift.protocol.TBinaryProtocol as TBinaryProtocol
+import thrift.transport.THttpClient as THttpClient
 
-from geeknote.geeknote import *
+from config import *
 
-# Connection to Geeknote
-geeknote  = GeekNote()
-authToken = geeknote.authToken
-noteStore = geeknote.getNoteStore()
+#
+def getNoteStore():
 
-def GeeknoteCreateNewNote(note):
+    noteStoreHttpClient = THttpClient.THttpClient(noteStoreUrl)
+    noteStoreProtocol = TBinaryProtocol.TBinaryProtocol(noteStoreHttpClient)
+    noteStore = NoteStore.Client(noteStoreProtocol)
+
+    return noteStore
+
+#
+noteStore = getNoteStore()
+
+#
+def EvernoteCreateNewNote(note):
     return noteStore.createNote(authToken, note)
 
-def GeeknoteCreateNewNotebook(notebook):
+#
+def EvernoteCreateNewNotebook(notebook):
     return noteStore.createNotebook(authToken, notebook)
 
-def GeeknoteFindNoteCounts():
+#
+def EvernoteFindNoteCounts():
     return noteStore.findNoteCounts(authToken, NoteStore.NoteFilter(), False)
 
-def GeeknoteGetDefaultNotebook():
+#
+def EvernoteGetDefaultNotebook():
     return noteStore.getDefaultNotebook(authToken)
 
-def GeeknoteGetNotes(searchWords=""):
+#
+def EvernoteGetNotes(searchWords=""):
     filter = NoteStore.NoteFilter(order = Types.NoteSortOrder.UPDATED)
     filter.words = searchWords
 
@@ -32,7 +48,7 @@ def GeeknoteGetNotes(searchWords=""):
     result = noteStore.findNotesMetadata(authToken, filter, 0, count, meta)
     update_count = lambda c: max(c - len(result.notes), 0)
     count = update_count(count)
-    
+
     while ((result.totalNotes != len(result.notes)) and count != 0):
         offset = len(result.notes)
         result.notes += noteStore.findNotesMetadata(
@@ -45,27 +61,34 @@ def GeeknoteGetNotes(searchWords=""):
 
     return notes
 
-def GeeknoteGetNotebook(guid):
+#
+def EvernoteGetNotebook(guid):
     try:
         return noteStore.getNotebook(authToken, guid)
     except:
         return None
 
-def GeeknoteGetNotebooks():
+#
+def EvernoteGetNotebooks():
     return noteStore.listNotebooks(authToken)
 
-def GeeknoteGetTags():
+#
+def EvernoteGetTags():
     return noteStore.listTags(authToken)
 
-def GeeknoteLoadNote(note):
+#
+def EvernoteLoadNote(note):
     return noteStore.getNote(authToken, note.guid, True, False, False, False)
 
-def GeeknoteRefreshNoteMeta(note):
+#
+def EvernoteRefreshNoteMeta(note):
     return noteStore.getNote(authToken, note.guid, False, False, False, False)
 
-def GeeknoteUpdateNote(note):
+#
+def EvernoteUpdateNote(note):
     noteStore.updateNote(authToken, note)
 
-def GeeknoteUpdateNotebook(notebook):
+#
+def EvernoteUpdateNotebook(notebook):
     noteStore.updateNotebook(authToken, notebook)
 

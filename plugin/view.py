@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import vim
+import os
 
 from enml  import *
 from utils import *
@@ -19,9 +20,9 @@ class NoteTracker(object):
         self.modified = False
 
 # Close all opened notes.
-def GeeknoteCloseAllNotes():
+def EvernoteCloseAllNotes():
     #
-    # Try to delete any temp files that still exist (is is possible that 
+    # Try to delete any temp files that still exist (is is possible that
     # some/all were already garbage collected by the OS.
     #
     try:
@@ -33,14 +34,14 @@ def GeeknoteCloseAllNotes():
     openNotes.clear()
 
 # Close the note associated with the given buffer name.
-def GeeknoteCloseNote(filename):
+def EvernoteCloseNote(filename):
     if filename in openNotes:
         os.remove(filename)
         del openNotes[filename]
 
 # Commit any changes that were made to the note in the buffer to the note.
-def GeeknoteCommitChangesToNote(note):
-    tracker = GeeknoteGetNoteTracker(note)
+def EvernoteCommitChangesToNote(note):
+    tracker = EvernoteGetNoteTracker(note)
 
     # If the note has not been modified, there's nothing more to do.
     if tracker.modified is False:
@@ -68,32 +69,32 @@ def GeeknoteCommitChangesToNote(note):
     tracker.note.content = textToENML(content)
 
     return True
- 
+
 # Find the object that is tracking the given note (None if note opened).
-def GeeknoteGetNoteTracker(note):
+def EvernoteGetNoteTracker(note):
     for filename in openNotes:
         if openNotes[filename].note.guid == note.guid:
             return openNotes[filename]
     return None
 
 # Given the name of a buffer, find the note that the buffer represents.
-def GeeknoteGetOpenNote(filename):
+def EvernoteGetOpenNote(filename):
     if filename in openNotes:
         return openNotes[filename].note
     return None
 
 # Determine if the note has been modified since since it was last saved.
-def GeeknoteNoteIsModified(note):
-    tracker = GeeknoteGetNoteTracker(note)
+def EvernoteNoteIsModified(note):
+    tracker = EvernoteGetNoteTracker(note)
     return tracker.modified
 
 # Determine if the user has already opened the given note.
-def GeeknoteNoteIsOpened(note):
-    tracker = GeeknoteGetNoteTracker(note)
+def EvernoteNoteIsOpened(note):
+    tracker = EvernoteGetNoteTracker(note)
     return True if tracker is not None else False
 
 # Open a note in the active window.
-def GeeknoteOpenNote(note):
+def EvernoteOpenNote(note):
     #
     # Determine which window to display the note in (creating one if necessary)
     # and switch to that window.
@@ -102,9 +103,9 @@ def GeeknoteOpenNote(note):
     prevWin = getPreviousWindow()
 
     setActiveWindow(prevWin)
-    isPrevUsable = GeeknoteIsWindowUsable(prevWin)
+    isPrevUsable = EvernoteIsWindowUsable(prevWin)
     if isPrevUsable is False:
-        firstUsableWin = GeeknoteGetFirstUsableWindow()
+        firstUsableWin = EvernoteGetFirstUsableWindow()
         if firstUsableWin != -1:
             setActiveWindow(firstUsableWin)
         else:
@@ -114,17 +115,17 @@ def GeeknoteOpenNote(note):
     # Check to see if the note is already opened before opening it in a new
     # buffer.
     #
-    opened = GeeknoteNoteIsOpened(note)
+    opened = EvernoteNoteIsOpened(note)
     if opened is False:
         # Load the note's content
-        note    = GeeknoteLoadNote(note)
+        note    = EvernoteLoadNote(note)
         content = ENMLtoText(note.content)
-        content = tools.stdoutEncode(content)
+        #content = tools.stdoutEncode(content)
 
         # Write the note's title and content to a temporary file.
         f = createTempFile(delete=False)
         f.write(note.title + '\n\n')
-        
+
         isNoteEmpty = not content.strip()
         if isNoteEmpty is False:
             f.write(content)
@@ -149,31 +150,31 @@ def GeeknoteOpenNote(note):
         openNotes[f.name] = NoteTracker(note, vim.current.buffer)
 
         # Register callbacks for the buffer events that affect the note.
-        autocmd('BufWritePre', 
+        autocmd('BufWritePre',
                 '<buffer>',
-                ':call Vim_GeeknotePrepareToSaveNote("{}")'.format(f.name))
+                ':call Vim_EvernotePrepareToSaveNote("{}")'.format(f.name))
 
         autocmd('BufWritePost',
                 '<buffer>',
-                ':call Vim_GeeknoteSaveNote("{}")'.format(f.name))
-     
+                ':call Vim_EvernoteSaveNote("{}")'.format(f.name))
+
         autocmd('BufDelete',
                 '<buffer>',
-                ':call Vim_GeeknoteCloseNote("{}")'.format(f.name))
+                ':call Vim_EvernoteCloseNote("{}")'.format(f.name))
 
-        vim.command("let b:GeeknoteTitle=\"%s\"" % note.title)
-        notebook = GeeknoteGetNotebook(note.notebookGuid)
-        vim.command("let b:GeeknoteNotebook=\"%s\"" % notebook.name)
+        vim.command("let b:EvernoteTitle=\"%s\"" % note.title)
+        notebook = EvernoteGetNotebook(note.notebookGuid)
+        vim.command("let b:EvernoteNotebook=\"%s\"" % notebook.name)
     #
     # Otherwise, the note has aleady been opened. Simply switch the active window
     # to the note's buffer.
     #
     else:
-        tracker = GeeknoteGetNoteTracker(note)
+        tracker = EvernoteGetNoteTracker(note)
         vim.command("buffer {}".format(tracker.buffer.name))
 
     #
-    # By default, Geeknote expects to receive notes with markdown-formated
+    # By default, Evernote expects to receive notes with markdown-formated
     # content. Set the buffer's 'filetype' and 'syntax' options.
     #
     # TODO: Figure out why setting the 'syntax' buffer option alone does not
@@ -185,12 +186,12 @@ def GeeknoteOpenNote(note):
     # Now restore the original window.
     setActiveWindow(origWin)
 
-def GeeknotePrepareToSaveNote(filename):
+def EvernotePrepareToSaveNote(filename):
     filename = os.path.abspath(filename)
     tracker  = openNotes[filename]
     tracker.modified = tracker.buffer.options['modified']
 
-def GeeknoteGetFirstUsableWindow():
+def EvernoteGetFirstUsableWindow():
    wnum = 1
    while wnum <= winnr('$'):
        bnum         = winbufnr(wnum)
@@ -199,18 +200,18 @@ def GeeknoteGetFirstUsableWindow():
        isPreviewWin = getWindowVariable(wnum, 'previewwindow')
        name         = getBufferName(bnum)
 
-       if ((bnum != -1)                 and 
+       if ((bnum != -1)                 and
            (buftype == '')              and
            (name == '')                 and
            (isPreviewWin is False)      and
-           ((isModified  is False)      or 
+           ((isModified  is False)      or
                hidden())):
            return wnum
        wnum += 1
    return -1
 
 
-def GeeknoteIsWindowUsable(wnum):
+def EvernoteIsWindowUsable(wnum):
     if winnr('$') == 1:
         return False
 

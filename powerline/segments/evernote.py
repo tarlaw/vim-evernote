@@ -11,21 +11,21 @@ from powerline.segments.vim import window_cached
 
 
 @window_cached
-def geeknote_get_note_title(pl):
-	if not bufvar_exists(None, 'GeeknoteTitle'):
+def evernote_get_note_title(pl):
+	if not bufvar_exists(None, 'EvernoteTitle'):
 		return None
 
-	title = vim.eval('getbufvar("%", "GeeknoteTitle")')
+	title = vim.eval('getbufvar("%", "EvernoteTitle")')
 	return [{
 		'contents': title,
 		'highlight_group': ['file_name'],
 	}]
 
-def geeknote_get_notebook_name(pl):
-	if not bufvar_exists(None, 'GeeknoteNotebook'):
+def evernote_get_notebook_name(pl):
+	if not bufvar_exists(None, 'EvernoteNotebook'):
 		return None
 
-	name = vim.eval('getbufvar("%", "GeeknoteNotebook")')
+	name = vim.eval('getbufvar("%", "EvernoteNotebook")')
 	return [{
 		'contents': name,
 		'highlight_group': ['file_name'],

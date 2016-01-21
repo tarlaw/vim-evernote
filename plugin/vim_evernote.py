@@ -29,18 +29,18 @@ import evernote.edam.error.ttypes as Errors
 
 explorer = Explorer()
 
-#======================== Geeknote Functions  ================================#
+#======================== Evernote Functions  ================================#
 
-def GeeknoteActivateNode():
+def EvernoteActivateNode():
     explorer.activateNode(vim.current.line)
 
-def GeeknoteCommitStart():
+def EvernoteCommitStart():
     explorer.commitChanges()
 
-def GeeknoteCommitComplete():
+def EvernoteCommitComplete():
     explorer.render()
 
-def GeeknoteCreateNote(title):
+def EvernoteCreateNote(title):
     #
     # Figure out what notebook to place the note in. Give preference to the
     # notebook selected in the explorer window (if one is selected). Otherwise,
@@ -48,7 +48,7 @@ def GeeknoteCreateNote(title):
     #
     notebook = explorer.getSelectedNotebook()
     if notebook is None:
-        notebook = GeeknoteGetDefaultNotebook()
+        notebook = EvernoteGetDefaultNotebook()
 
     if notebook is None:
         vim.command('echoerr "Please select a notebook first."')
@@ -64,23 +64,23 @@ def GeeknoteCreateNote(title):
     note.created      = None
     note.notebookGuid = notebook.guid
 
-    note = GeeknoteCreateNewNote(note)
-    GeeknoteOpenNote(note)
+    note = EvernoteCreateNewNote(note)
+    EvernoteOpenNote(note)
 
     # Add the note to the navigation window.
     explorer.addNote(note)
 
-def GeeknoteCreateNotebook(name):
+def EvernoteCreateNotebook(name):
     notebook = Types.Notebook()
     notebook.name = name.strip('"\'')
     try:
-        notebook = GeeknoteCreateNewNotebook(notebook)
+        notebook = EvernoteCreateNewNotebook(notebook)
     except:
         vim.command('echoerr "Failed to create notebook."')
 
     explorer.addNotebook(notebook)
 
-def GeeknoteHandleNoteSaveFailure(note, e):
+def EvernoteHandleNoteSaveFailure(note, e):
     print e
     msg  = '+------------------- WARNING -------------------+\n'
     msg += '|                                               |\n'
@@ -91,12 +91,12 @@ def GeeknoteHandleNoteSaveFailure(note, e):
     msg += '+------------------- WARNING -------------------+\n'
     vim.command('echoerr "%s"' % msg)
 
-def GeeknoteSaveAsNote():
+def EvernoteSaveAsNote():
     global explorer
 
     #
     # Figure out what notebook to place the note in. Give preference
-    # to the notebook selected in the explorer window (if one is 
+    # to the notebook selected in the explorer window (if one is
     # selected). Otherwise, place it into the default notebook.
     #
     notebook = None
@@ -104,7 +104,7 @@ def GeeknoteSaveAsNote():
         notebook = explorer.getSelectedNotebook()
 
     if notebook is None:
-        notebook = GeeknoteGetDefaultNotebook()
+        notebook = EvernoteGetDefaultNotebook()
 
     if notebook is None:
         vim.command('echoerr "Please select a notebook first."')
@@ -135,42 +135,42 @@ def GeeknoteSaveAsNote():
         note.notebookGuid = notebook.guid
 
     try:
-        note = GeeknoteCreateNewNote(note)
-        note = GeeknoteLoadNote(note)
+        note = EvernoteCreateNewNote(note)
+        note = EvernoteLoadNote(note)
     except Exception as e:
-        GeeknoteHandleNoteSaveFailure(note, e)
+        EvernoteHandleNoteSaveFailure(note, e)
         return
 
-    GeeknoteOpenNote(note)
+    EvernoteOpenNote(note)
 
     # Add the note to the navigation window.
     explorer.addNote(note)
 
-def GeeknoteSaveNote(filename):
-    note    = GeeknoteGetOpenNote(filename)
-    changed = GeeknoteCommitChangesToNote(note)
+def EvernoteSaveNote(filename):
+    note    = EvernoteGetOpenNote(filename)
+    changed = EvernoteCommitChangesToNote(note)
     if changed:
         try:
-            GeeknoteUpdateNote(note)
+            EvernoteUpdateNote(note)
         except Exception as e:
-            GeeknoteHandleNoteSaveFailure(note, e)
+            EvernoteHandleNoteSaveFailure(note, e)
 
-def GeeknoteSearch(args):
-    notes = GeeknoteGetNotes(args)
+def EvernoteSearch(args):
+    notes = EvernoteGetNotes(args)
 
     explorer.clearSearchResults()
     explorer.addSearchResults(notes)
     explorer.render()
 
-def GeeknoteSync():
+def EvernoteSync():
     explorer.commitChanges()
-    explorer.refresh()    
+    explorer.refresh()
     explorer.render()
 
-def GeeknoteTerminate():
-    GeeknoteCloseAllNotes()
+def EvernoteTerminate():
+    EvernoteCloseAllNotes()
 
-def GeeknoteToggle():
+def EvernoteToggle():
     global explorer
 
     if explorer.isHidden():

@@ -2,23 +2,23 @@
 import vim
 import tempfile
 
-GeeknoteNeovimMode = False
-if int(vim.eval('exists("g:GeeknoteNeovimMode")')):
-    GeeknoteNeovimMode = vim.eval('g:GeeknoteNeovimMode')
+EvernoteNeovimMode = False
+if int(vim.eval('exists("g:EvernoteNeovimMode")')):
+    EvernoteNeovimMode = vim.eval('g:EvernoteNeovimMode')
 
 def createTempFile(**kwargs):
     if 'prefix' not in kwargs:
-        kwargs['prefix'] = '__Geeknote__'
+        kwargs['prefix'] = '__Evernote__'
 
     if 'suffix' not in kwargs:
         geeknoteformat = 'markdown'
-        if int(vim.eval('exists("g:GeeknoteFormat")')):
-            geeknoteformat = vim.eval('g:GeeknoteFormat')
+        if int(vim.eval('exists("g:EvernoteFormat")')):
+            geeknoteformat = vim.eval('g:EvernoteFormat')
         kwargs['suffix'] = '.{}'.format(geeknoteformat)
 
     if 'dir' not in kwargs:
-        if int(vim.eval('exists("g:GeeknoteScratchDirectory")')):
-            kwargs['dir'] = vim.eval('g:GeeknoteScratchDirectory')
+        if int(vim.eval('exists("g:EvernoteScratchDirectory")')):
+            kwargs['dir'] = vim.eval('g:EvernoteScratchDirectory')
 
     return tempfile.NamedTemporaryFile(**kwargs)
 
@@ -91,23 +91,23 @@ def bufInWindows(bnum):
      return cnt
 
 def getBufferName(bnum):
-    if GeeknoteNeovimMode:
+    if EvernoteNeovimMode:
         bnum -= 1
     return vim.buffers[bnum].name
 
 def getBufferVariable(bnum, var):
-    if GeeknoteNeovimMode:
+    if EvernoteNeovimMode:
         bnum -= 1
     return vim.buffers[bnum].options[var]
- 
+
 def getWindowVariable(wnum, var):
     return vim.windows[wnum-1].options[var]
 
 def setBufferVariable(bnum, var, value):
-    if GeeknoteNeovimMode:
+    if EvernoteNeovimMode:
         bnum -= 1
     vim.buffers[bnum].options[var] = value
- 
+
 def setWindowVariable(wnum, var, value):
     vim.windows[wnum-1].options[var] = value
 

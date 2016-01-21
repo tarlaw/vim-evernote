@@ -11,13 +11,13 @@ from change import *
 ExplorerCharOpened = u'\u25bd'
 ExplorerCharClosed = u'\u25b6'
 
-if int(vim.eval('exists("g:GeeknoteExplorerNodeOpened")')):
+if int(vim.eval('exists("g:EvernoteExplorerNodeOpened")')):
     ExplorerCharOpened = vim.eval(
-        'g:GeeknoteExplorerNodeOpened').decode('utf8')
+        'g:EvernoteExplorerNodeOpened').decode('utf8')
 
-if int(vim.eval('exists("g:GeeknoteExplorerNodeClosed")')):
+if int(vim.eval('exists("g:EvernoteExplorerNodeClosed")')):
     ExplorerCharClosed = vim.eval(
-        'g:GeeknoteExplorerNodeClosed').decode('utf8')
+        'g:EvernoteExplorerNodeClosed').decode('utf8')
 
 #======================== Registry ===========================================#
 
@@ -55,7 +55,7 @@ def deleteNodes():
 def getNode(key):
     if key in registry:
         return registry[key]
-    return None 
+    return None
 
 def getNodeByInstance(guid, instance):
     key = guid + "(" + str(instance) + ")"
@@ -143,7 +143,7 @@ class NotebookNode(Node):
 
     def adapt(self, line):
         if len(self.children) > 0:
-            r = re.compile("^\S+"     # match leading non-whitespace characters 
+            r = re.compile("^\S+"     # match leading non-whitespace characters
                            "(?:\s+)?" # optional whitespace
                            "(.*)"     # notebook name
                            "\(\d+\)"  # note count
@@ -192,7 +192,7 @@ class NotebookNode(Node):
 
     def getNotes(self):
         searchWords = 'notebook:"%s"' % self.notebook.name
-        return GeeknoteGetNotes(searchWords)
+        return EvernoteGetNotes(searchWords)
 
     def render(self, buffer, attribs):
         numNotes = len(self.children)
@@ -253,14 +253,14 @@ class NoteNode(Node):
     def activate(self):
         super(NoteNode, self).activate()
 
-        GeeknoteOpenNote(self.note)
+        EvernoteOpenNote(self.note)
 
     def getGuid(self):
         return self.note.guid
 
     def refresh(self):
         if self.title is not None:
-            self.note = GeeknoteRefreshNoteMeta(self.note)
+            self.note = EvernoteRefreshNoteMeta(self.note)
 
         self.notebookGuid = self.note.notebookGuid
         self.setTitle(self.note.title)
@@ -313,7 +313,7 @@ class TagNode(Node):
 
     def getNotes(self):
         searchWords = 'tag:"%s"' % self.tag.name
-        return GeeknoteGetNotes(searchWords)
+        return EvernoteGetNotes(searchWords)
 
     def render(self, buffer, attribs):
         numNotes = len(self.children)
@@ -357,9 +357,9 @@ class Explorer(object):
 
         self.refresh()
 
-        self.dataFile = createTempFile(prefix='__GeeknoteExplorer__')
+        self.dataFile = createTempFile(prefix='__EvernoteExplorer__')
 
-        autocmd('VimLeave', '*', ':call Vim_GeeknoteTerminate()')
+        autocmd('VimLeave', '*', ':call Vim_EvernoteTerminate()')
 
     def __del__(self):
         try:
@@ -380,7 +380,7 @@ class Explorer(object):
 
     def addNote(self, note):
         notebook = getNodeByInstance(note.notebookGuid, 0)
-        node = notebook.addNote(note) 
+        node = notebook.addNote(note)
 
         #
         # Expand the notebook so that the new node can be selected. This must
@@ -485,7 +485,7 @@ class Explorer(object):
 
         while row > 0:
             key = self.getNodeKey(self.buffer[row])
-            if key is not None: 
+            if key is not None:
                 node = getNode(key)
                 if not isinstance(node, NoteNode):
                     return node
@@ -511,7 +511,7 @@ class Explorer(object):
         node = self.getSelectedNode()
         if isinstance(node, NotebookNode):
             return node.notebook
-        if isinstance(node, NoteNode): 
+        if isinstance(node, NoteNode):
             if isinstance(node.parent, NotebookNode):
                 node = getNode(node.parent.getKey())
                 return node.notebook
@@ -530,7 +530,7 @@ class Explorer(object):
     def getNodeKey(self, nodeText):
         r = re.compile('^.+\[(.+)\]$')
         m = r.match(nodeText)
-        if m: 
+        if m:
             return m.group(1)
         return None
 
@@ -548,14 +548,14 @@ class Explorer(object):
 
         wnum = getActiveWindow()
         bnum = self.buffer.number
-         
-        autocmd('BufWritePre' , 
-                '<buffer>',
-                ':call Vim_GeeknoteCommitStart()')
 
-        autocmd('BufWritePost', 
+        autocmd('BufWritePre' ,
                 '<buffer>',
-                ':call Vim_GeeknoteCommitComplete()')
+                ':call Vim_EvernoteCommitStart()')
+
+        autocmd('BufWritePost',
+                '<buffer>',
+                ':call Vim_EvernoteCommitComplete()')
 
         setWindowVariable(wnum, 'winfixwidth', True)
         setWindowVariable(wnum, 'wrap'       , False)
@@ -577,13 +577,13 @@ class Explorer(object):
         self.saveExpandState()
         deleteNodes()
 
-        self.noteCounts = GeeknoteFindNoteCounts()
+        self.noteCounts = EvernoteFindNoteCounts()
 
         del self.notebooks[:]
         self.refreshNotebooks()
 
         del self.tags[:]
-        tags = GeeknoteGetTags()
+        tags = EvernoteGetTags()
         for tag in tags:
             self.addTag(tag)
         self.restoreExpandState()
@@ -593,10 +593,10 @@ class Explorer(object):
         # If the user already specified which notebooks to load, load just
         # those notebooks.
         #
-        if int(vim.eval('exists("g:GeeknoteNotebooks")')):
-            guids = vim.eval('g:GeeknoteNotebooks')
+        if int(vim.eval('exists("g:EvernoteNotebooks")')):
+            guids = vim.eval('g:EvernoteNotebooks')
             for guid in guids:
-                notebook = GeeknoteGetNotebook(guid)
+                notebook = EvernoteGetNotebook(guid)
                 if notebook is not None:
                     self.addNotebook(notebook)
             return
@@ -605,13 +605,13 @@ class Explorer(object):
         # Otherwise, load all notebooks and apply any filters that the user
         # specified (if any).
         #
-        notebooks = GeeknoteGetNotebooks()
-        if not int(vim.eval('exists("g:GeeknoteNotebookFilters")')):
+        notebooks = EvernoteGetNotebooks()
+        if not int(vim.eval('exists("g:EvernoteNotebookFilters")')):
             for notebook in notebooks:
                 self.addNotebook(notebook)
         else:
             regex = []
-            filters = vim.eval('g:GeeknoteNotebookFilters')
+            filters = vim.eval('g:EvernoteNotebookFilters')
             for filter in filters:
                 try:
                     r = re.compile(filter)
@@ -636,10 +636,10 @@ class Explorer(object):
         # Save the selected node before redrawing the explorer.
         self.selectedNode = self.getSelectedNode()
         if self.selectedNode is None:
-            notebook = GeeknoteGetDefaultNotebook()
+            notebook = EvernoteGetDefaultNotebook()
             self.selectNotebook(notebook)
 
-        # 
+        #
         # Before overwriting the navigation window, look for any changes made
         # by the user. Do not synchronize them yet with the server, just make
         # sure they are not lost.
@@ -708,14 +708,14 @@ class Explorer(object):
 
     def resize(self):
         # Fix the width if requested.
-        if int(vim.eval('exists("g:GeeknoteExplorerWidth")')):
-            width = int(vim.eval('g:GeeknoteExplorerWidth'))
+        if int(vim.eval('exists("g:EvernoteExplorerWidth")')):
+            width = int(vim.eval('g:EvernoteExplorerWidth'))
             vim.command("vertical resize %d" % width)
             return
 
         # Get the max allowable width (default is 40 columns)
-        if int(vim.eval('exists("g:GeeknoteMaxExplorerWidth")')):
-            maxWidth = int(vim.eval('g:GeeknoteMaxExplorerWidth'))
+        if int(vim.eval('exists("g:EvernoteMaxExplorerWidth")')):
+            maxWidth = int(vim.eval('g:EvernoteMaxExplorerWidth'))
         else:
             maxWidth = 40
 
@@ -774,8 +774,8 @@ class Explorer(object):
         self.initView()
         self.render()
 
-        noremap("<silent> <buffer> <cr>", 
-            ":call Vim_GeeknoteActivateNode()<cr>")
+        noremap("<silent> <buffer> <cr>",
+            ":call Vim_EvernoteActivateNode()<cr>")
 
         self.hidden = False
 
