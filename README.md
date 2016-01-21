@@ -1,10 +1,9 @@
 # vim-evernote
 
 [Evernote](http://www.evernote.com) Plugin for Vim. This plugin forked from
-[vim-geeknote](https://github.com/neilagabriel/vim-geeknote) with geeknote need
-removed and reuse enmal to text part of
-[sublime-evernote](https://github.com/bordaigorl/sublime-evernote). So, it
-compatible with sublime-evernote.
+[vim-geeknote](https://github.com/neilagabriel/vim-geeknote) with geeknote
+needed removed and reuse enmal to text part of
+[sublime-evernote](https://github.com/bordaigorl/sublime-evernote).
 
 ## Intro 
 
