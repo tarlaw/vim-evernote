@@ -1,10 +1,10 @@
 import vim
 import re
 
-from explorer import Explorer
-from view     import *
-from utils    import *
-from enml     import *
+from vim_evernote_explorer import Explorer
+from vim_evernote_view     import *
+from vim_evernote_utils    import *
+from vim_evernote_enml     import *
 
 import evernote.edam.type.ttypes  as Types
 import evernote.edam.error.ttypes as Errors

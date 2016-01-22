@@ -1,10 +1,10 @@
 import vim
 import re
 
-from view   import *
-from utils  import *
-from conn   import *
-from change import *
+from vim_evernote_view   import *
+from vim_evernote_utils  import *
+from vim_evernote_conn   import *
+from vim_evernote_change import *
 
 #======================== Global Setup/Config ================================#
 

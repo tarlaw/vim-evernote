@@ -1,4 +1,4 @@
-from conn import *
+from vim_evernote_conn import *
 
 #======================== Change =============================================#
 

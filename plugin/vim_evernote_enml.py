@@ -1,5 +1,5 @@
 import html2text
-import markdown2
+import vim_evernote_markdown2
 from base64 import b64encode, b64decode
 
 from config import *

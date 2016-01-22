@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import vim
 import os
 
-from enml  import *
-from utils import *
-from conn  import *
+from vim_evernote_enml  import *
+from vim_evernote_utils import *
+from vim_evernote_conn  import *
 
 # Maps buffer names to NoteTracker objects.
 openNotes = {}
