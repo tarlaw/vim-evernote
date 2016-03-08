@@ -4,7 +4,7 @@ from base64 import b64encode, b64decode
 
 from config import *
 
-VIM_EVERNOTE_COMMENT_BEG = '<!-- vim:'
+VIM_EVERNOTE_COMMENT_BEG = '<!-- Sublime:'
 VIM_EVERNOTE_COMMENT_END = '-->'
 
 #
@@ -36,7 +36,7 @@ def ENMLtoText(contentENML):
 # Convert text to enml use python-markdown2
 #
 def textToENML(content):
-    body = markdown2.markdown(content, extras = MD_EXTRAS)
+    body = vim_evernote_markdown2.markdown(content, extras = MD_EXTRAS)
 
     if 'inline-css' in MD_EXTRAS:
         if 'body' in MD_EXTRAS['inline-css']:
